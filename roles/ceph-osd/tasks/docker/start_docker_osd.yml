@@ -16,6 +16,17 @@
   with_items: "{{ ceph_osd_docker_devices }}"
   register: osd_prepared
 
+- set_fact:
+    docker_env_args: -e OSD_JOURNAL={{ item.1 }}
+  when:
+    - raw_journal_devices|length > 0
+
+# need to merge with the previous list
+- set_fact:
+    docker_env_args: -e KV_TYPE={{ kv_type }} -e KV_IP={{ kv_endpoint }} -e KV_PORT={{ kv_port }}
+  when:
+    - containerized_deployment_with_kv
+
 # use shell rather than docker module
 # to ensure osd disk prepare finishes before
 # starting the next task
@@ -24,46 +35,23 @@
     docker run --net=host \
     --pid=host \
     --privileged=true \
-    --name="ceph-osd-prepare-{{ ansible_hostname }}-dev{{ item.0 | regex_replace('/', '') }}" \
+    --name=ceph-osd-prepare-{{ ansible_hostname }}-dev{{ item.0 | regex_replace('/', '') }} \
     -v /etc/ceph:/etc/ceph \
     -v /var/lib/ceph/:/var/lib/ceph/ \
     -v /dev:/dev \
     -v /etc/localtime:/etc/localtime:ro \
-    -e "OSD_DEVICE={{ item.0 }}" \
+    -e OSD_DEVICE={{ item.0 }} \
+    {{ docker_env_args }} \
     -e CEPH_DAEMON=OSD_CEPH_DISK_PREPARE \
     {{ ceph_osd_docker_prepare_env }} \
-    "{{ ceph_docker_registry }}/{{ ceph_docker_image }}:{{ ceph_docker_image_tag }}"
+    {{ ceph_docker_registry }}/{{ ceph_docker_image }}:{{ ceph_docker_image_tag }}
   with_together:
     - "{{ ceph_osd_docker_devices }}"
+    - "{{ raw_journal_devices }}"
     - "{{ osd_prepared.results }}"
   when:
-    - item.1.get("rc", 0) != 0
+    - item.2.get("rc", 0) != 0
     - ceph_osd_docker_prepare_env is defined
-    - not containerized_deployment_with_kv
-
-- name: prepare ceph osd disk with kv_store
-  shell: |
-    docker run  --net=host   \
-    --pid=host \
-    --privileged=true \
-    --name="ceph-osd-prepare-{{ ansible_hostname }}-dev-{{ item.0 | regex_replace('/', '') }}" \
-    -v /dev:/dev \
-    -v /etc/localtime:/etc/localtime:ro \
-    -e "OSD_DEVICE={{ item.0 }}" \
-    -e "{{ ceph_osd_docker_prepare_env }}" \
-    -e CEPH_DAEMON=OSD_CEPH_DISK_PREPARE \
-    -e KV_TYPE={{kv_type}} \
-    -e KV_IP={{kv_endpoint}} \
-    -e KV_PORT={{kv_port}} \
-    {{ ceph_osd_docker_prepare_env }} \
-    "{{ ceph_docker_registry }}/{{ ceph_docker_image }}:{{ ceph_docker_image_tag }}" \
-  with_together:
-    - "{{ ceph_osd_docker_devices }}"
-    - "{{ osd_prepared.results }}"
-  when:
-    - item.1.get("rc", 0) != 0
-    - ceph_osd_docker_prepare_env is defined
-    - containerized_deployment_with_kv
 
 - name: generate ceph osd docker run script
   become: true
