@@ -26,24 +26,16 @@
     - osd_group_name is defined
     - osd_group_name in group_names
     - not containerized_deployment
-    - not journal_collocation
-    - not raw_multi_journal
-    - not dmcrypt_journal_collocation
-    - not dmcrypt_dedicated_journal
+    - osd_scenario == 'dummy'
 
-- name: verify only one osd scenario was chosen
+- name: make sure a valid osd scenario was chosen
   fail:
-    msg: "please select only one osd scenario"
+    msg: "please choose an osd scenario, valid scenarios are {{ valid_osd_scenarios }}"
   when:
     - osd_group_name is defined
     - osd_group_name in group_names
     - not containerized_deployment
-    - (journal_collocation and raw_multi_journal)
-      or (dmcrypt_journal_collocation and journal_collocation)
-      or (dmcrypt_journal_collocation and raw_multi_journal)
-      or (dmcrypt_dedicated_journal and journal_collocation)
-      or (dmcrypt_dedicated_journal and raw_multi_journal)
-      or (dmcrypt_dedicated_journal and dmcrypt_journal_collocation)
+    - not osd_scenario in valid_osd_scenarios
 
 - name: verify devices have been provided
   fail:
@@ -51,7 +43,7 @@
   when:
     - osd_group_name is defined
     - osd_group_name in group_names
-    - (journal_collocation or containerized_deployment)
+    - (osd_scenario == 'journal_collocation' or containerized_deployment)
     - not osd_auto_discovery
     - devices|length == 0
 
@@ -71,7 +63,7 @@
     - osd_group_name is defined
     - osd_group_name in group_names
     - not containerized_deployment
-    - raw_multi_journal
+    - osd_scenario == 'raw_multi_journal'
     - raw_journal_devices|length == 0
       or devices|length == 0
 
@@ -82,7 +74,7 @@
     - osd_group_name is defined
     - osd_group_name in group_names
     - not containerized_deployment
-    - raw_multi_journal
+    - osd_scenario == 'raw_multi_journal'
     - raw_journal_devices is string
     - raw_journal_devices|length == 0
       or devices|length == 0

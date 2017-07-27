@@ -115,7 +115,15 @@ dummy:
 # /dev/sda: PTTYPE="gpt"
 # /dev/sda1: UUID="9c43e346-dd6e-431f-92d8-cbed4ccb25f6" TYPE="xfs" PARTLABEL="ceph data" PARTUUID="749c71c9-ed8f-4930-82a7-a48a3bcdb1c7"
 # /dev/sda2: PARTLABEL="ceph block" PARTUUID="e6ca3e1d-4702-4569-abfa-e285de328e9d"
-#journal_collocation: false
+#
+# To enable this scenario do: osd_scenario: journal_collocation
+
+#osd_scenario: dummy
+#valid_osd_scenarios:
+#  - journal_collocation
+#  - raw_multi_journal
+#  - dmcrypt_dedicated_journal
+#  - dmcrypt_journal_collocation
 
 
 # II.  Second scenario:  N journal devices for N OSDs
@@ -129,7 +137,10 @@ dummy:
 # While starting you have 2 options:
 # 1. Pre-allocate all the devices
 # 2. Progressively add new devices
-#raw_multi_journal: false
+#
+#
+# To enable this scenario do: osd_scenario: raw_multi_journal
+
 #raw_journal_devices:
 #  - /dev/sdf
 #  - /dev/sdf
@@ -188,7 +199,9 @@ dummy:
 # Keys are stored into the monitors k/v store
 # Use 'true' to enable this scenario
 # Both journal and data are stored on the same dm-crypt encrypted device
-#dmcrypt_journal_collocation: false
+#
+#
+# To enable this scenario do: osd_scenario: dmcrypt_journal_collocation
 
 
 # VI. Encrypt osd data and/or journal devices with dm-crypt.
@@ -196,7 +209,9 @@ dummy:
 # Use 'true' to enable this scenario
 # Journal and osd data are separated, each with their own dm-crypt device
 # You must use raw_journal_devices and set your journal devices
-#dmcrypt_dedicated_journal: false
+#
+#
+# To enable this scenario do: osd_scenario: dmcrypt_dedicated_journal
 
 
 ##########

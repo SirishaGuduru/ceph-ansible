@@ -10,7 +10,7 @@ devices:
   - '/dev/sda'
 raw_journal_devices:
   - '/dev/sdb'
-raw_multi_journal: True
+osd_scenario: raw_multi_journal
 os_tuning_params:
   - { name: kernel.pid_max, value: 4194303 }
   - { name: fs.file-max, value: 26234859 }
