@@ -43,7 +43,6 @@
   when:
     - osd_group_name is defined
     - osd_group_name in group_names
-    - (osd_scenario == 'journal_collocation' or containerized_deployment)
     - not osd_auto_discovery
     - devices|length == 0
 
@@ -63,8 +62,8 @@
     - osd_group_name is defined
     - osd_group_name in group_names
     - not containerized_deployment
-    - osd_scenario == 'raw_multi_journal'
-    - raw_journal_devices|length == 0
+    - osd_scenario == 'non-collocated'
+    - dedicated_devices|length == 0
       or devices|length == 0
 
 - name: make sure the raw_journal_devices variable is a list
@@ -74,9 +73,9 @@
     - osd_group_name is defined
     - osd_group_name in group_names
     - not containerized_deployment
-    - osd_scenario == 'raw_multi_journal'
-    - raw_journal_devices is string
-    - raw_journal_devices|length == 0
+    - osd_scenario == 'non-collocated'
+    - dedicated_devices is string
+    - dedicated_devices|length == 0
       or devices|length == 0
 
 - name: check if bluestore is supported by the selected ceph version

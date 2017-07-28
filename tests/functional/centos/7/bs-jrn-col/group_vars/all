@@ -9,7 +9,7 @@ journal_size: 100
 devices:
   - '/dev/sda'
   - '/dev/sdb'
-osd_scenario: journal_collocation
+osd_scenario: collocated
 osd_objectstore: "bluestore"
 os_tuning_params:
   - { name: kernel.pid_max, value: 4194303 }
