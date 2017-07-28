@@ -20,9 +20,10 @@
 
   when:
 # We do not want to run these checks on initial deployment (`socket.rc == 0`)
-    - socket.rc == 0
+    - socket_mon.rc == 0
     - ceph_current_fsid.rc == 0
     - mon_group_name in group_names
+    - inventory_hostname == groups.get(mon_group_name) | last
 
 # This does not just restart OSDs but everything else too. Unfortunately
 # at this time the ansible role does not have an OSD id list to use

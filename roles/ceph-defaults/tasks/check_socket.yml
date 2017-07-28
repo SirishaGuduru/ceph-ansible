@@ -1,0 +1,38 @@
+---
+# These checks are used to avoid running handlers at initial deployment.
+- name: check for a ceph socket
+  shell: "{{ docker_exec_cmd }} bash -c 'stat /var/run/ceph/*.asok > /dev/null 2>&1'"
+  changed_when: false
+  failed_when: false
+  always_run: true
+  register: socket_mon
+  when: inventory_hostname in groups.get(mon_group_name)
+
+  #- name: get osd(s) container(s)
+  #  shell: docker ps -q
+  #  changed_when: false
+  #  register: osd_container_list
+  #  always_run: true
+  #  when:
+  #    - containerized_deployment
+  #    - inventory_hostname in groups.get(osd_group_name)
+
+- name: check for a ceph socket (osds)
+  shell: |
+    "docker exec ceph-osd-{{ ansible_hostname }}-{{ item | replace('/', '') }} bash -c 'stat /var/run/ceph/*.asok'"
+  changed_when: false
+  failed_when: false
+  always_run: true
+  register: socket_osd_container
+  with_items: "{{ devices }}"
+#  with_items: "{{ osd_container_list.get('stdout_lines') }}"
+  when:
+    - containerized_deployment
+    - inventory_hostname in groups.get(osd_group_name)
+
+- name: check for a rados gateway socket
+  shell: "{{ docker_exec_cmd }} bash -c 'stat {{ rbd_client_admin_socket_path }}*.asok > /dev/null 2>&1'"
+  changed_when: false
+  failed_when: false
+  always_run: true
+  register: socketrgw
