@@ -60,7 +60,6 @@ dummy:
 #ceph_config_keys: [] # DON'T TOUCH ME
 #rgw_config_keys: "/" # DON'T TOUCH ME
 
-
 ###########
 # SYSTEMD #
 ###########
@@ -70,4 +69,3 @@ dummy:
 #ceph_rgw_systemd_overrides:
 #  Service:
 #    PrivateDevices: False
-
